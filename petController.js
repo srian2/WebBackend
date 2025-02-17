@@ -1,118 +1,74 @@
-const Pet = require('../models/petModel'); // Adjust the path based on your project structure
+const Pet = require('../models/petModel'); // ✅ Ensure correct import
 
-// Controller function to add a pet
-const addPet = async (req, res) => {
-  const { name, species, age, breed, description, image } = req.body;
+// 🐾 Add a new pet
+exports.addPet = async (req, res) => {
+    try {
+        const { name, species, age, breed, description } = req.body; // Removed `imageUrl` from destructuring
+        const uploadedImageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-  try {
-    // Check if all required fields are provided
-    if (!name || !species || !age) {
-      return res.status(400).json({ message: 'Name, species, and age are required.' });
+        const newPet = await Pet.create({ name, species, age, breed, description, imageUrl: uploadedImageUrl });
+
+        res.status(201).json({ success: true, pet: newPet });
+    } catch (error) {
+        console.error("Error adding pet:", error);
+        res.status(500).json({ success: false, message: error.message }); // Returns the actual error
     }
-
-    // Create a new pet record in the database
-    const newPet = await Pet.create({
-    name,
-    species,
-    age,
-    breed,
-    description,
-    image
-    });
-
-    res.status(201).json({ message: 'Pet added successfully!', pet: newPet });
-  } catch (error) {
-    console.error('Error adding pet:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
 };
 
- 
-// Get All Pets Function
-const getAllPets = async (req, res) => {
+
+// 🐾 Get all pets
+exports.getAllPets = async (req, res) => {
     try {
-        // Retrieve all pets from the database
         const pets = await Pet.findAll();
         res.status(200).json(pets);
     } catch (error) {
         console.error('Error fetching pets:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
 
-// Get Pet by ID Function
-const getPetById = async (req, res) => {
-    const { id } = req.params;
-
+// 🐾 Get a single pet by ID
+exports.getPetById = async (req, res) => {
     try {
-        // Find the pet by ID
-        const pet = await Pet.findByPk(id);
+        const pet = await Pet.findByPk(req.params.id);
         if (!pet) {
-            return res.status(404).json({ message: 'Pet not found' });
+            return res.status(404).json({ error: 'Pet not found' });
         }
-
         res.status(200).json(pet);
     } catch (error) {
-        console.error('Error fetching pet:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
 
-// Update Pet Function
-const updatePet = async (req, res) => {
-    const { id } = req.params;
-    const { name, species, age, breed, description, image } = req.body;
-
+// 🐾 Update a pet
+exports.updatePet = async (req, res) => {
     try {
-        // Find pet by ID
-        const pet = await Pet.findByPk(id);
+        const { name, species, age, breed, description } = req.body;
+        const pet = await Pet.findByPk(req.params.id);
+
         if (!pet) {
-            return res.status(404).json({ message: 'Pet not found' });
+            return res.status(404).json({ error: 'Pet not found' });
         }
 
-        // Update pet details
-        pet.name = name || pet.name;
-        pet.species = species || pet.species;
-        pet.age = age || pet.age;
-        pet.breed = breed || pet.breed;
-        pet.description = description !== undefined ?description : pet.description;
-        pet.image = image || pet.image;
-
-        await pet.save();
+        await pet.update({ name, species, age, breed, description });
 
         res.status(200).json({ message: 'Pet updated successfully', pet });
     } catch (error) {
-        console.error('Error updating pet:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
 
-// Delete Pet Function
-const deletePet = async (req, res) => {
-    const { id } = req.params;
-
+// 🐾 Delete a pet
+exports.deletePet = async (req, res) => {
     try {
-        // Find pet by ID
-        const pet = await Pet.findByPk(id);
+        const pet = await Pet.findByPk(req.params.id);
         if (!pet) {
-            return res.status(404).json({ message: 'Pet not found' });
+            return res.status(404).json({ error: 'Pet not found' });
         }
 
-        // Delete pet
         await pet.destroy();
-
         res.status(200).json({ message: 'Pet deleted successfully' });
     } catch (error) {
-        console.error('Error deleting pet:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
-};
-
-// Export Functions
-module.exports = {
-    addPet,
-    getAllPets,
-    getPetById,
-    updatePet,
-    deletePet
 };
