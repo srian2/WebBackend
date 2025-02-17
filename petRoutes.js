@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Pet = require('../models/petModel');  // Correct model path
+const petController = require('../controllers/petController'); // ✅ Import petController
 
-// Create a new pet
-router.post('/pets', async (req, res) => {
-    try {
-        const { name, species, age, breed, description, image } = req.body;
-        const newPet = await Pet.create({ name, species, age, breed, description, image });
+// 🐾 Fetch all pets
+router.get('/', petController.getAllPets);
 
-        res.status(201).json({ message: 'Pet added successfully', pet: newPet });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error adding pet' });
-    }
-});
+// 🐾 Add a pet
+router.post('/', petController.addPet);
+
+// 🐾 Get a single pet by ID
+router.get('/:id', petController.getPetById);
+
+// 🐾 Update a pet by ID
+router.put('/pets/:id', petController.updatePet);
+
+// 🐾 Delete a pet by ID
+router.delete('/:id', petController.deletePet);
 
 module.exports = router;
-

@@ -1,41 +1,35 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
+const { DataTypes } = require('sequelize'); 
+const { sequelize } = require('../config/database'); // ✅ Ensure correct import
 
-// Define the Pet model
-const Pet = sequelize.define(
-  'Pet',
-    {
+const Pet = sequelize.define('Pet', {
     name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     species: {
-      type: DataTypes.STRING,
-      allowNull: false,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     age: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
     breed: {
-      type: DataTypes.STRING,
-      allowNull: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    imageUrl: {
         type: DataTypes.STRING,
-        allowNull: true, 
+        allowNull: true,
     },
-    image: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    },
-},
-{
-    timestamps: true, // Automatically add `createdAt` and `updatedAt`
-    createdAt: 'created_at', // Custom name for createdAt
-    updatedAt: 'updated_at', // Custom name for updatedAt
-}
-);
+}, {
+    tableName: 'Pet', // ✅ Ensures correct table name
+    timestamps: TransformStreamDefaultController, // If you don't have createdAt/updatedAt columns
+});
 
-// Return the model
-module.exports = Pet;
+module.exports = Pet; // ✅ Correct export
+
