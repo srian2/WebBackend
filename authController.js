@@ -3,7 +3,7 @@ const User = require("../models/userModel")
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 // Signup Function
-const signup = async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         console.log('Request Body:', req.body);
 
@@ -32,7 +32,7 @@ const signup = async (req, res) => {
     }
 };
 // Login function
-const login = async (req, res) => {
+exports.login = async (req, res) => {
     try {
         const { Email, Password } = req.body;
         console.log("Login Request Body:", req.body);
@@ -62,7 +62,5 @@ const login = async (req, res) => {
     }
 };
 
-
-module.exports = { signup,login };
 
 
