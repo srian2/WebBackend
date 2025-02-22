@@ -3,17 +3,31 @@ const Pet = require('../models/petModel'); // ✅ Ensure correct import
 // 🐾 Add a new pet
 exports.addPet = async (req, res) => {
     try {
-        const { name, species, age, breed, description } = req.body; // Removed `imageUrl` from destructuring
-        const uploadedImageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+        console.log("📷 Received file:", req.file); // ✅ Debugging line
 
-        const newPet = await Pet.create({ name, species, age, breed, description, imageUrl: uploadedImageUrl });
+        const { name, species, age, breed, description } = req.body;
+        const uploadedImageUrl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
+
+        if (!name || !species || !age || !breed || !description) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
+        }
+
+        const newPet = await Pet.create({
+            name,
+            species,
+            age: Number(age),
+            breed,
+            description,
+            imageUrl: uploadedImageUrl,
+        });
 
         res.status(201).json({ success: true, pet: newPet });
     } catch (error) {
         console.error("Error adding pet:", error);
-        res.status(500).json({ success: false, message: error.message }); // Returns the actual error
+        res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 
 // 🐾 Get all pets
