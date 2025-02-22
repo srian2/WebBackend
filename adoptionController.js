@@ -1,46 +1,55 @@
-const Adoption = require('../models/adoption');
-const User = require('../models/User');
-const Pet = require('../models/Pet');
+const Adoption = require("../models/adoption");
 
-// Create an adoption request
-exports.createAdoptionRequest = async (req, res) => {
-    try {
-        const { petId, message } = req.body;
-        const userId = req.user.id;
+// 📌 Submit Adoption Request
+exports.submitAdoption = async (req, res) => {
+  try {
+    console.log("📢 Received adoption request:", req.body); // Log request data
 
-        const adoption = await Adoption.create({ userId, petId, message });
-        res.status(201).json({ success: true, data: adoption });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error', error });
+    const { name, email, phone, address, petName, reason } = req.body;
+    
+    if (!name || !email || !phone || !address || !petName || !reason) {
+      return res.status(400).json({ error: "All fields are required" });
     }
+
+    const newAdoption = await Adoption.create({
+      name,
+      email,
+      phone,
+      address,
+      petName,
+      reason,
+    });
+
+    console.log("✅ Adoption request saved:", newAdoption); // Log successful entry
+
+    res.status(201).json({ message: "Adoption request submitted", adoption: newAdoption });
+  } catch (error) {
+    console.error("🚨 Server Error:", error.message); // Log the actual error
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
 };
 
-// Get all adoption requests (Admin Only)
-exports.getAdoptionRequests = async (req, res) => {
-    try {
-        const requests = await Adoption.findAll({
-            include: [{ model: User, attributes: ['Fullname', 'Email'] }, { model: Pet, attributes: ['name', 'breed'] }]
-        });
-        res.status(200).json({ success: true, data: requests });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error', error });
-    }
-};
 
-// Update adoption request status (Admin Only)
+// 📌 Update Adoption Status (Admin)
 exports.updateAdoptionStatus = async (req, res) => {
-    try {
-        const { status } = req.body;
-        const { id } = req.params;
+  try {
+    const { status } = req.body;
+    const { id } = req.params;
 
-        const adoption = await Adoption.findByPk(id);
-        if (!adoption) return res.status(404).json({ success: false, message: 'Adoption request not found' });
-
-        adoption.status = status;
-        await adoption.save();
-
-        res.status(200).json({ success: true, data: adoption });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Server error', error });
+    if (!["Pending", "Approved", "Rejected"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
     }
+
+    const adoption = await Adoption.findByPk(id);
+    if (!adoption) {
+      return res.status(404).json({ error: "Adoption request not found" });
+    }
+
+    adoption.status = status;
+    await adoption.save();
+
+    res.json({ message: "Adoption status updated", adoption });
+  } catch (error) {
+    res.status(500).json({ error: "Error updating adoption request" });
+  }
 };
