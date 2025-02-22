@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize'); 
+const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database'); // ✅ Ensure correct import
 
 const Pet = sequelize.define('Pet', {
