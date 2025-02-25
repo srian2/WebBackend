@@ -1,70 +1,60 @@
-// const express = require('express');
-// const bodyParser = require('body-parser');
-// const authRoutes = require('./routes/authRoutes');
-// const pool = require('./config/database'); // Adjust path as needed
-// const {sequelize} = require("./config/database")
-// const cors = require('cors');  // Import the CORS package
-
-// const petRoutes = require('./routes/petRoutes'); // Import pet routes
-// const app = express(); // ✅ Initialize app BEFORE using it
-
-
-
-// require('dotenv').config();  // Ensure this is at the top of your main entry file (e.g., index.js)
-// app.use(cors());
-// app.use(express.json());  // For parsing application/json
-
-// // Middleware to parse JSON and URL-encode d bodies
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-
-// // Register routes for authentication
-// app.use('/api/auth', authRoutes);
-// app.use('/api', petRoutes); // Use '/api/pets' for clarity
-
-
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-
-
-
-
-// sequelize.sync({ force: true })
-// .then(()=>{
-//     console.log("DB synced")
-// })
-// .catch((error)=>{
-//     console.log("Error syncing db:",error)
-// })
-// // Start the server
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, ()=>{
-//     console.log(`Server running on http://localhost:${PORT}`);
-// })
-
-// index.js
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { sequelize } = require('./config/database');
+const upload = require("./multerConfig"); // ✅ Ensure correct path
+
+// Import Routes
 const petRoutes = require('./routes/petRoutes');
+const authRoutes = require('./routes/authRoutes');
+const adoptRoutes = require("./routes/adoptRoutes");
 
 const app = express();
-app.use(cors());
-app.use(express.json()); // Middleware for parsing JSON bodies
-app.use(bodyParser.json()); // Middleware for parsing URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));  // ✅ Add this line
 
-// Register the routes
-app.use('/api', petRoutes); // This will allow /api/pets endpoint
+// ✅ Apply CORS before routes
+app.use(cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5174", // Change to your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-sequelize.sync()
-  .then(() => console.log('DB synced'))
-  .catch((error) => console.log('Error syncing db:', error));
+// ✅ Serve Static Files (Uploads Folder)
+app.use("/uploads", express.static("uploads"));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+// ✅ File Upload Route
+// app.post("/api/upload", upload.single("image"), (req, res) => {
+//     if (!req.file) {
+//         return res.status(400).json({ error: "No file uploaded" });
+//     }
+//     res.json({ success: true, imageUrl: `/uploads/${req.file.filename}` });
+// });
 
+// ✅ Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
+// ✅ Register Routes
+app.use('/api/pets', petRoutes);
+app.use('/api/auth', authRoutes);
+app.use("/api/adoptions", adoptRoutes);
 
+// ✅ Start Server
+const startServer = async () => {
+    try {
+        await sequelize.sync({ alter: true }); // ✅ Ensures schema is updated without dropping data
+        console.log("✅ Database synced successfully.");
+
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running at http://localhost:${PORT}`);
+        });
+
+    } catch (error) {
+        console.error("❌ Database sync error:", error);
+    }
+};
+
+startServer();
