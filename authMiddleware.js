@@ -2,21 +2,26 @@ const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
     const authHeader = req.header("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Access denied, token missing or invalid!" });
-    }
-
-    const token = authHeader.split(" ")[1]; // Extract token after "Bearer"
-
     try {
+        // 🔓 Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Attach decoded token to request
-        next();
+        req.user = decoded; // Attach user details from token
+
+        next(); // 🚀 Proceed to the next middleware or route handler
     } catch (error) {
-        console.error("Invalid token:", error);
-        res.status(401).json({ error: "Invalid token" });
+        console.error("🚨 Invalid token:", error.message);
+
+        let errorMessage = "Invalid token";
+        if (error.name === "TokenExpiredError") {
+            errorMessage = "Token has expired. Please log in again.";
+        } else if (error.name === "JsonWebTokenError") {
+            errorMessage = "Invalid token. Authentication failed.";
+        }
+
+        res.status(401).json({ error: errorMessage });
     }
 };
+
 
 
 
