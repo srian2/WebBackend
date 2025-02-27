@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Adoption = require("../models/adoption");
+const adoptionController = require("../controllers/adoptionController");
+
 
 // 📌 POST: Submit Adoption Request
 router.post("/", async (req, res) => {
@@ -12,7 +14,6 @@ router.post("/", async (req, res) => {
     }
 
     const newAdoption = await Adoption.create({
-   
       name,
       email,
       phone,
@@ -27,5 +28,9 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+// 📌 GET: Get All Adoption Requests
+router.get("/getAdoptions", adoptionController.getAllAdoptions);
+router.put("/updateStatus/:id", adoptionController.updateAdoptionStatus);
 
+
+module.exports = router;
