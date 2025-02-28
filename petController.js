@@ -1,17 +1,14 @@
 const Pet = require('../models/petModel'); // ✅ Ensure correct import
 
-// 🐾 Add a new pet
 exports.addPet = async (req, res) => {
     try {
-        console.log("📷 Received file:", req.file); // ✅ Debugging line
-
+        console.log("📷 Received file:", req.file); 
         const { name, species, age, breed, description } = req.body;
         const uploadedImageUrl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
 
         if (!name || !species || !age || !breed || !description) {
             return res.status(400).json({ success: false, message: "All fields are required" });
         }
-
         const newPet = await Pet.create({
             name,
             species,
@@ -28,9 +25,6 @@ exports.addPet = async (req, res) => {
     }
 };
 
-
-
-// 🐾 Get all pets
 exports.getAllPets = async (req, res) => {
     try {
         const pets = await Pet.findAll();
@@ -41,7 +35,6 @@ exports.getAllPets = async (req, res) => {
     }
 };
 
-// 🐾 Get a single pet by ID
 exports.getPetById = async (req, res) => {
     try {
         const pet = await Pet.findByPk(req.params.id);
@@ -54,7 +47,6 @@ exports.getPetById = async (req, res) => {
     }
 };
 
-// 🐾 Update a pet
 exports.updatePet = async (req, res) => {
     try {
         const { name, species, age, breed, description } = req.body;
@@ -71,18 +63,23 @@ exports.updatePet = async (req, res) => {
         res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
-
-// 🐾 Delete a pet
 exports.deletePet = async (req, res) => {
     try {
-        const pet = await Pet.findByPk(req.params.id);
-        if (!pet) {
-            return res.status(404).json({ error: 'Pet not found' });
-        }
-
-        await pet.destroy();
-        res.status(200).json({ message: 'Pet deleted successfully' });
+      console.log("Received delete request with body:", req.body); // 🛠 Debugging Log
+    const { name, species, age, breed, description } = req.body;
+    if (!name || !species || !age || !breed || !description) {
+        return res.status(400).json({ error: "All pet details must be provided." });
+    }
+    const deletedPet = await Pet.destroy({
+        where: { name, species, age, breed, description },
+    });
+    if (deletedPet === 0) {
+        return res.status(404).json({ error: "No matching pet found in the database." });
+    }
+    res.json({ message: "Pet deleted successfully!" });
     } catch (error) {
-        res.status(500).json({ error: 'Server error: ' + error.message });
+    console.error("Error deleting pet:", error);
+    res.status(500).json({ error: "Internal Server Error" });
     }
 };
+

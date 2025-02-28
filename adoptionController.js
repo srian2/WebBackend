@@ -1,16 +1,11 @@
 const Adoption = require("../models/adoption");
-
-// 📌 Submit Adoption Request
 exports.submitAdoption = async (req, res) => {
   try {
     console.log("📢 Received adoption request:", req.body); // Log request data
-
     const { name, email, phone, address, petName, reason } = req.body;
-    
     if (!name || !email || !phone || !address || !petName || !reason) {
       return res.status(400).json({ error: "All fields are required" });
     }
-
     const newAdoption = await Adoption.create({
       name,
       email,
@@ -18,38 +13,46 @@ exports.submitAdoption = async (req, res) => {
       address,
       petName,
       reason,
-    });
-
-    console.log("✅ Adoption request saved:", newAdoption); // Log successful entry
-
+    })
+    console.log("✅ Adoption request saved:", newAdoption); 
     res.status(201).json({ message: "Adoption request submitted", adoption: newAdoption });
   } catch (error) {
-    console.error("🚨 Server Error:", error.message); // Log the actual error
+    console.error("🚨 Server Error:", error.message); 
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+};
+exports.updateAdoptionStatus = async (req, res) => {
+  try {
+      const { id } = req.params; 
+      const { status } = req.body; 
+      if (!status) {
+          return res.status(400).json({ message: "Status is required" });
+      }
+
+      const adoption = await Adoption.findByPk(id);
+      if (!adoption) {
+          return res.status(404).json({ message: "Adoption request not found" });
+      }
+      adoption.status = status;
+      await adoption.save();
+      res.status(200).json({ message: "Status updated successfully", adoption });
+  } catch (error) {
+      console.error("Error updating adoption status:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+};
+exports.getAllAdoptions = async (req, res) => {
+  try {
+    const adoptions = await Adoption.findAll(); // Fetch all adoption requests
+    res.status(200).json({ adoptions });
+  } catch (error) {
+    console.error("🚨 Error fetching adoptions:", error.message);
     res.status(500).json({ error: "Server error", details: error.message });
   }
 };
 
 
-// 📌 Update Adoption Status (Admin)
-exports.updateAdoptionStatus = async (req, res) => {
-  try {
-    const { status } = req.body;
-    const { id } = req.params;
 
-    if (!["Pending", "Approved", "Rejected"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status value" });
-    }
 
-    const adoption = await Adoption.findByPk(id);
-    if (!adoption) {
-      return res.status(404).json({ error: "Adoption request not found" });
-    }
 
-    adoption.status = status;
-    await adoption.save();
 
-    res.json({ message: "Adoption status updated", adoption });
-  } catch (error) {
-    res.status(500).json({ error: "Error updating adoption request" });
-  }
-};
