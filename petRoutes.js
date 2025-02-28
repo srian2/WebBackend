@@ -13,7 +13,7 @@ router.post("/", upload.single("image"), petController.addPet);
 router.get('/:id', petController.getPetById);
 
 // 🐾 Delete a pet by full details (not ID)
-router.post('/delete', petController.deletePet); // ✅ Change DELETE to POST
+router.post('/delete', petController.deletePet);
 
 
 module.exports = router;
