@@ -1,11 +1,11 @@
 const { DataTypes } = require("sequelize");
-const {sequelize} = require("../config/database"); // ✅ Import sequelize instance
+const {sequelize} = require("../config/database");
 
 const Adoption = sequelize.define("adoption", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true, // ✅ Ensure this is set
+    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,

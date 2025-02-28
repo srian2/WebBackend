@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database'); // ✅ Ensure correct import
+const { sequelize } = require('../config/database'); 
 
 const Pet = sequelize.define('Pet', {
     name: {
@@ -27,8 +27,8 @@ const Pet = sequelize.define('Pet', {
         allowNull: true,
     },
 }, {
-    tableName: 'Pet', // ✅ Ensures correct table name
-    timestamps: TransformStreamDefaultController, // If you don't have createdAt/updatedAt columns
+    tableName: 'Pet', 
+    timestamps: TransformStreamDefaultController, 
 });
 
 module.exports = Pet; // ✅ Correct export
