@@ -10,10 +10,10 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir); // ✅ Use the ensured directory
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // ✅ Unique filename
+        cb(null, Date.now() + path.extname(file.originalname));
     },
 });
 
@@ -28,7 +28,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage,
     fileFilter,
-    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB file size limit
+    limits: { fileSize: 2 * 1024 * 1024 },
 });
 
 module.exports = upload;

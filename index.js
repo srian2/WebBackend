@@ -14,7 +14,7 @@ const adminRoutes = require("./routes/adminRoutes");
 
 app.use(express.urlencoded({ extended: true })); 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173", // Change to your frontend URL
+    origin: process.env.CLIENT_URL || "http://localhost:5174", // Change to your frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
